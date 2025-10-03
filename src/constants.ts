@@ -4,7 +4,7 @@ export const SEO_DATA_FILENAME = 'seo-data.json';
 export const SEO_COMPONENT_FILENAME = 'seo.tsx';
 
 export const TEMPLATES = {
-    config: `import type { GlobalWebsiteConfiguration } from "metanext";
+	config: `import type { GlobalWebsiteConfiguration } from "metanext";
 
 export const seoConfig: GlobalWebsiteConfiguration = {
   name: "{{siteName}}",
@@ -25,7 +25,7 @@ export const seoConfig: GlobalWebsiteConfiguration = {
 	],
 	manifest: "",
 };`,
-    component: `"use client";
+	component: `"use client";
   
   import { useEffect } from "react";
   import Head from "next/head";
