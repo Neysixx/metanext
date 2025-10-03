@@ -1,3 +1,5 @@
+import type { OpenGraphType } from "next/dist/lib/metadata/types/opengraph-types";
+
 export interface SEOAuthor {
 	name: string;
 	url?: string;
@@ -31,7 +33,7 @@ export interface SEOTwitter {
 }
 
 export interface SEOOpenGraph {
-	type?: 'website' | 'article' | 'profile' | 'book' | string;
+	type?: OpenGraphType;
 	locale?: string;
 	url?: string;
 	title?: string;

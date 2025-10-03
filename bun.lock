@@ -8,7 +8,6 @@
         "@types/prompts": "^2.4.9",
         "chalk": "^5.3.0",
         "commander": "^11.1.0",
-        "metanext": "file:../metanext",
         "fs-extra": "^11.2.0",
         "ora": "^7.0.1",
         "prompts": "^2.4.2",
@@ -344,8 +343,6 @@
     "lru-cache": ["lru-cache@10.4.3", "", {}, "sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ=="],
 
     "magic-string": ["magic-string@0.30.19", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-2N21sPY9Ws53PZvsEpVtNuSW+ScYbQdp4b9qUaL+9QkHUrGFKo56Lg9Emg5s9V/qrtNBmiR01sYhUOwu3H+VOw=="],
-
-    "metanext": ["metanext@file:", { "dependencies": { "@types/fs-extra": "^11.0.4", "@types/prompts": "^2.4.9", "chalk": "^5.3.0", "commander": "^11.1.0", "fs-extra": "^11.2.0", "ora": "^7.0.1", "prompts": "^2.4.2", "tsup": "^8.5.0" }, "devDependencies": { "@biomejs/biome": "2.2.4", "@types/bun": "latest", "husky": "^9.1.7" }, "peerDependencies": { "next": ">=14.0.0", "react": ">=18.0.0", "typescript": "^5" }, "bin": { "metanext": "./dist/cli.js" } }],
 
     "mimic-fn": ["mimic-fn@2.1.0", "", {}, "sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg=="],
 
