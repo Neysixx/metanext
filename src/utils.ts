@@ -235,12 +235,12 @@ export function configToMetadata(config: GlobalWebsiteConfiguration, pagePath?: 
 			follow: pageConfig.robots.follow,
 			googleBot: pageConfig.robots.googleBot
 				? {
-					index: pageConfig.robots.googleBot.index,
-					follow: pageConfig.robots.googleBot.follow,
-					'max-video-preview': pageConfig.robots.googleBot['max-video-preview'],
-					'max-image-preview': pageConfig.robots.googleBot['max-image-preview'],
-					'max-snippet': pageConfig.robots.googleBot['max-snippet'],
-				}
+						index: pageConfig.robots.googleBot.index,
+						follow: pageConfig.robots.googleBot.follow,
+						'max-video-preview': pageConfig.robots.googleBot['max-video-preview'],
+						'max-image-preview': pageConfig.robots.googleBot['max-image-preview'],
+						'max-snippet': pageConfig.robots.googleBot['max-snippet'],
+					}
 				: undefined,
 		};
 	}
