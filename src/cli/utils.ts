@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { SEO_CONFIG_DIR, SEO_COMPONENT_FILENAME } from '../constants';
+import { SEO_COMPONENT_FILENAME, SEO_CONFIG_DIR } from '../constants';
 
 export function validateConfig(config: any): string[] {
 	const errors: string[] = [];
