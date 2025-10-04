@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import ora from 'ora';
-import { SEO_CONFIG_FILENAME } from '../constants';
+import { SEO_CONFIG_FILENAME } from '../../constants';
 import { getPath, runDoctorChecks } from '../utils';
 import { program } from './program';
 

@@ -1,3 +1,4 @@
+import type { TemplateString } from 'next/dist/lib/metadata/types/metadata-types';
 import type { OpenGraphType } from 'next/dist/lib/metadata/types/opengraph-types';
 
 export interface SEOAuthor {
@@ -33,7 +34,7 @@ export interface SEOTwitter {
 }
 
 export interface SEOOpenGraph {
-	type?: OpenGraphType;
+	type: OpenGraphType;
 	locale?: string;
 	url?: string;
 	title?: string;
@@ -61,13 +62,12 @@ export interface SEOJsonLd {
 }
 
 /**
- * Common SEO structure for site or page-level
+ * Main SEO structure for site or page-level configuration
  */
 export interface SEOConfig {
-	title?: {
-		default?: string;
-		template?: string;
-	};
+	name: string;
+	url: string;
+	title?: TemplateString | string;
 	description?: string;
 	keywords?: string[];
 	creator?: string;
@@ -81,18 +81,4 @@ export interface SEOConfig {
 	robots?: SEORobots;
 	jsonld?: SEOJsonLd[];
 	locale?: string;
-}
-
-/**
- * Main configuration with global + per-page overrides
- */
-export interface GlobalWebsiteConfiguration extends SEOConfig {
-	name: string;
-	url: string;
-
-	/**
-	 * Page-specific overrides (scoped by route slug)
-	 * Example: pages["/contributions"]
-	 */
-	pages?: Record<string, SEOConfig>;
 }

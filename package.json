@@ -10,7 +10,16 @@
 		"metanext": "./dist/cli.js"
 	},
 	"exports": {
-		".": "./dist/index.js"
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs",
+			"types": "./dist/index.d.ts"
+		},
+		"./next": {
+			"import": "./dist/next.js",
+			"require": "./dist/next.cjs",
+			"types": "./dist/next.d.ts"
+		}
 	},
 	"type": "module",
 	"author": "Kyllian SENRENS <kylliansenrens3004@gmail.com>",

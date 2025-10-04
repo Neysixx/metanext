@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import ora from 'ora';
 import path from 'path';
 import prompts from 'prompts';
-import { SEO_CONFIG_FILENAME, TEMPLATES } from '../constants';
+import { SEO_CONFIG_FILENAME, TEMPLATES } from '../../constants';
 import { getPath } from '../utils';
 import { program } from './program';
 

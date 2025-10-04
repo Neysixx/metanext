@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { program } from './program';
+import { program } from './commands/program';
 
-import './init';
-import './configure';
-import './doctor';
+import './commands/init';
+import './commands/configure';
+import './commands/doctor';
 
 program.parse(process.argv);
 

@@ -103,6 +103,8 @@ Cette commande :
 
 ### 3. Utilisation dans vos pages
 
+#### Option A : Avec le composant SEO (recommandé)
+
 ```tsx
 // app/page.tsx
 import { SEO } from "@/lib/seo";
@@ -118,6 +120,25 @@ export default function HomePage() {
   );
 }
 ```
+
+#### Option B : Avec les fonctions utilitaires Next.js
+
+```tsx
+// app/layout.tsx ou app/page.tsx
+import { seoConfig } from "@/lib/seo";
+import { configToMetadata } from "metanext";
+
+export const metadata = configToMetadata(seoConfig, {
+  title: "Page spécifique",
+  description: "Description de la page"
+});
+```
+
+💡 **Pourquoi cette approche ?**
+- ✅ **Compatible** avec tous les environnements (AWS Amplify, Vercel, etc.)
+- ✅ **Prévisible** et explicite
+- ✅ **Performant** (pas d'accès au système de fichiers)
+- ✅ **Type-safe** avec TypeScript
 
 💡 Le composant `<SEO />` :
 - Injecte automatiquement :
