@@ -11,14 +11,14 @@
 	},
 	"exports": {
 		".": {
+			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js",
-			"require": "./dist/index.cjs",
-			"types": "./dist/index.d.ts"
+			"require": "./dist/index.cjs"
 		},
 		"./next": {
+			"types": "./dist/next.d.ts",
 			"import": "./dist/next.js",
-			"require": "./dist/next.cjs",
-			"types": "./dist/next.d.ts"
+			"require": "./dist/next.cjs"
 		}
 	},
 	"type": "module",
@@ -60,7 +60,7 @@
 		"tsup": "^8.5.0"
 	},
 	"peerDependencies": {
-		"typescript": "^5",
+		"typescript": "^5.9.3",
 		"next": ">=14.0.0",
 		"react": ">=18.0.0"
 	},

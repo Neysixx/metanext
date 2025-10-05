@@ -1,14 +1,16 @@
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import ora from 'ora';
-import { SEO_COMPONENT_FILENAME, SEO_CONFIG_FILENAME, SEO_DATA_FILENAME } from '../../constants';
-import { generateSEOComponent, getPath, validateConfig } from '../utils';
+import prompts from 'prompts';
+import { SEO_CONFIG_FILENAME } from '../../constants';
+import { getPath, findNextFiles, addMetadataToFile } from '../utils';
 import { program } from './program';
 
 program
 	.command('configure')
-	.description('Compile the configuration and generate the SEO files')
+	.description('Apply SEO configuration to all Next.js pages and layouts')
 	.option('--validate', 'Validate only without generating', false)
+	.option('--force', 'Force overwrite existing metadata without asking', false)
 	.action(async (options) => {
 		console.log(chalk.cyan.bold('\n⚙️  MetaNext - Configuration\n'));
 
@@ -18,51 +20,148 @@ program
 			// Check if the file exists
 			if (!(await fs.pathExists(getPath(SEO_CONFIG_FILENAME)))) {
 				spinner.fail(SEO_CONFIG_FILENAME + ' file not found');
-				console.log(chalk.yellow('\n💡 Run first : ') + chalk.white('bunx metanext init'));
+				console.log(chalk.yellow('\n💡 Run first: ') + chalk.white('bunx metanext init'));
 				return;
 			}
 
-			spinner.text = 'Compiling configuration...';
+			spinner.text = 'Scanning Next.js files...';
 
-			// Compile the TypeScript file
-			// Note: In production, use esbuild or tsx for execution
-			const configModule = await import(getPath(SEO_CONFIG_FILENAME));
-			const config = configModule.default;
-
-			spinner.text = 'Validating configuration...';
-
-			// Basic validation
-			const errors = validateConfig(config);
-			if (errors.length > 0) {
-				spinner.fail('Invalid configuration');
-				console.log(chalk.red('\n❌ Errors detected :\n'));
+			// Find all layout and page files
+			const files = await findNextFiles();
+			
+			if (files.length === 0) {
+				spinner.fail('No Next.js layout or page files found');
+				console.log(chalk.yellow('\n💡 Make sure you have an app/ or pages/ directory with layout.tsx/page.tsx files'));
 				return;
 			}
 
-			if (options.validate) {
-				spinner.succeed('Configuration valid !');
-				return;
+			spinner.succeed(`Found ${files.length} file(s) to process`);
+
+			// Show files found
+			console.log(chalk.cyan('\n📁 Files found:'));
+			files.forEach(file => {
+				const status = file.hasMetadata 
+					? chalk.yellow('(has metadata)') 
+					: chalk.green('(no metadata)');
+				console.log(chalk.gray(`   • ${file.path} ${status}`));
+			});
+
+			// Process each file
+			const results = {
+				added: 0,
+				overwritten: 0,
+				skipped: 0,
+				errors: [] as string[]
+			};
+
+			// Handle files with existing metadata
+			const filesWithMetadata = files.filter(f => f.hasMetadata);
+			const filesWithoutMetadata = files.filter(f => !f.hasMetadata);
+
+			// Auto-add metadata to files without existing metadata
+			console.log(chalk.cyan('\n🔄 Processing files without metadata...'));
+			for (const file of filesWithoutMetadata) {
+				try {
+					const success = await addMetadataToFile(file.path, false);
+					if (success) {
+						results.added++;
+						console.log(chalk.green(`   ✓ Added metadata to ${file.path}`));
+					}
+				} catch (error) {
+					results.errors.push(`${file.path}: ${(error as Error).message}`);
+					console.log(chalk.red(`   ✗ Error in ${file.path}`));
+				}
 			}
 
-			spinner.text = 'Generating files...';
+			// Handle files with existing metadata
+			if (filesWithMetadata.length > 0) {
+				console.log(chalk.yellow(`\n⚠️  ${filesWithMetadata.length} file(s) already have metadata exports`));
+				
+				if (options.force) {
+					// Force overwrite all
+					console.log(chalk.cyan('\n🔄 Overwriting all existing metadata (--force)...'));
+					for (const file of filesWithMetadata) {
+						try {
+							const success = await addMetadataToFile(file.path, true);
+							if (success) {
+								results.overwritten++;
+								console.log(chalk.yellow(`   ✓ Overwritten ${file.path}`));
+							}
+						} catch (error) {
+							results.errors.push(`${file.path}: ${(error as Error).message}`);
+							console.log(chalk.red(`   ✗ Error in ${file.path}`));
+						}
+					}
+				} else {
+					// Ask for each file individually
+					console.log(chalk.cyan('\n🔄 Processing files with existing metadata...'));
+					for (const file of filesWithMetadata) {
+						const response = await prompts({
+							type: 'confirm',
+							name: 'overwrite',
+							message: `Overwrite metadata in ${file.path}?`,
+							initial: false
+						});
 
-			// Generate seo-data.json
-			await fs.writeFile(getPath(SEO_DATA_FILENAME), JSON.stringify(config, null, 2), 'utf8');
+						if (response.overwrite === undefined) {
+							console.log(chalk.yellow('\n❌ Operation cancelled'));
+							break;
+						}
 
-			// Generate the SEO component
-			await generateSEOComponent(config);
+						if (response.overwrite) {
+							try {
+								const success = await addMetadataToFile(file.path, true);
+								if (success) {
+									results.overwritten++;
+									console.log(chalk.yellow(`   ✓ Overwritten ${file.path}`));
+								}
+							} catch (error) {
+								results.errors.push(`${file.path}: ${(error as Error).message}`);
+								console.log(chalk.red(`   ✗ Error in ${file.path}`));
+							}
+						} else {
+							results.skipped++;
+							console.log(chalk.gray(`   ○ Skipped ${file.path}`));
+						}
+					}
+				}
+			}
 
-			spinner.succeed('Configuration compiled successfully !');
+			// Show summary
+			console.log(chalk.green.bold('\n✅ Configuration Summary:\n'));
+			console.log(chalk.gray(`   • ${results.added} file(s) with metadata added`));
+			if (results.overwritten > 0) {
+				console.log(chalk.yellow(`   • ${results.overwritten} file(s) overwritten`));
+			}
+			if (results.skipped > 0) {
+				console.log(chalk.gray(`   • ${results.skipped} file(s) skipped`));
+			}
+			if (results.errors.length > 0) {
+				console.log(chalk.red(`   • ${results.errors.length} error(s):`));
+				results.errors.forEach(error => {
+					console.log(chalk.red(`     - ${error}`));
+				});
+			}
 
-			console.log(chalk.green('\n✅ Files generated :'));
-			console.log(chalk.gray('   • ' + getPath(SEO_DATA_FILENAME)));
-			console.log(chalk.gray('   • ' + getPath(SEO_COMPONENT_FILENAME)));
-			console.log(chalk.cyan('\n📝 Use in your pages :'));
-			console.log(chalk.white('   import { SEO } from "' + getPath(SEO_COMPONENT_FILENAME) + '"'));
-			console.log(chalk.white('   <SEO name="home" />'));
-			console.log();
+			// Information about overrides
+			if (results.added > 0 || results.overwritten > 0) {
+				console.log(chalk.cyan.bold('\n📝 Next Steps:\n'));
+				console.log(chalk.white('   The following metadata export has been added to your files:'));
+				console.log(chalk.gray("   import { seoConfig } from '@/lib/seo';"));
+				console.log(chalk.gray('   export const metadata = seoConfig.configToMetadata();\n'));
+				
+				console.log(chalk.white('   To customize metadata for specific pages, you can:'));
+				console.log(chalk.gray('   1. Pass overrides to configToMetadata():'));
+				console.log(chalk.gray('      export const metadata = seoConfig.configToMetadata({'));
+				console.log(chalk.gray('        title: "Custom Page Title",'));
+				console.log(chalk.gray('        description: "Custom description"'));
+				console.log(chalk.gray('      });\n'));
+				console.log(chalk.gray('   2. Or manually modify the metadata object after generation'));
+				console.log();
+			}
+
 		} catch (error) {
-			spinner.fail('Error during configuration');
+			spinner.fail(`Error during configuration. You may have to check your configuration file in ${getPath(SEO_CONFIG_FILENAME)}.`);
 			console.error(chalk.red((error as Error).message));
 			process.exit(1);
 		}

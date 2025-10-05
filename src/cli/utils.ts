@@ -1,23 +1,13 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { SEO_COMPONENT_FILENAME, SEO_CONFIG_DIR } from '../constants';
+import { SEO_CONFIG_DIR } from '../constants';
+import type { FileInfo } from './types';
 
-export function validateConfig(config: any): string[] {
-	const errors: string[] = [];
-
-	if (!config.site) {
-		errors.push('Property "site" missing');
-	} else {
-		if (!config.site.name) errors.push('site.name is required');
-		if (!config.site.baseUrl) errors.push('site.baseUrl is required');
-		if (config.site.baseUrl?.endsWith('/')) {
-			errors.push('site.baseUrl must not end with "/"');
-		}
-	}
-
-	return errors;
-}
-
+/**
+ * Get the path to the configuration file
+ * @param filename - The name of the configuration file
+ * @returns The path to the configuration file
+ */
 export function getPath(filename: string): string {
 	// Check if we are in a src based codebase
 	if (fs.existsSync(process.cwd() + '/src')) {
@@ -26,6 +16,11 @@ export function getPath(filename: string): string {
 	return path.join(process.cwd(), SEO_CONFIG_DIR, filename);
 }
 
+/**
+ * Run the doctor checks
+ * @param config - The configuration object
+ * @returns The issues object
+ */
 export function runDoctorChecks(config: any) {
 	const issues = { errors: [] as string[], warnings: [] as string[], suggestions: [] as string[] };
 
@@ -50,73 +45,149 @@ export function runDoctorChecks(config: any) {
 	return issues;
 }
 
-export async function generateSEOComponent(config: any) {
-	const componentCode = `"use client";
-  
-  import seoData from "./seo-data.json";
-  
-  interface SEOProps {
-    name: string;
-    overrides?: Partial<{
-      title: string;
-      description: string;
-      image: string;
-      url: string;
-    }>;
-  }
-  
-  export function SEO({ name, overrides = {} }: SEOProps) {
-    const pageConfig = seoData.pages[name];
-    
-    if (!pageConfig) {
-      console.warn(\`[MetaNext] Page "\${name}" not found in SEO config\`);
-      return null;
-    }
-  
-    const config = { ...pageConfig, ...overrides };
-    const siteConfig = seoData.site;
-  
-    return (
-      <>
-        <title>{config.title}</title>
-        <meta name="description" content={config.description} />
-        
-        {config.keywords && (
-          <meta name="keywords" content={config.keywords.join(", ")} />
-        )}
-        
-        {/* Open Graph */}
-        <meta property="og:title" content={config.title} />
-        <meta property="og:description" content={config.description} />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content={config.image || siteConfig.defaultImage} />
-        <meta property="og:url" content={\`\${siteConfig.baseUrl}\${config.path || ""}\`} />
-        
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={config.title} />
-        <meta name="twitter:description" content={config.description} />
-        <meta name="twitter:image" content={config.image || siteConfig.defaultImage} />
-        
-        {/* Canonical */}
-        <link rel="canonical" href={\`\${siteConfig.baseUrl}\${config.path || ""}\`} />
-        
-        {/* JSON-LD */}
-        {config.jsonld && config.jsonld.map((schema: any, i: number) => (
-          <script
-            key={i}
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-          />
-        ))}
-      </>
-    );
-  }
-  
-  export function getSEO(name: string) {
-    return seoData.pages[name] || null;
-  }
-  `;
+/**
+ * Find all Next.js files in the project
+ * @returns A list of FileInfo objects
+ */
+export async function findNextFiles(): Promise<FileInfo[]> {
+	const files: FileInfo[] = [];
+	
+	// Check if we're in a src-based project
+	const baseDir = fs.existsSync(process.cwd() + '/src') ? 'src' : '';
+	const appDir = path.join(process.cwd(), baseDir, 'app');
+	const pagesDir = path.join(process.cwd(), baseDir, 'pages');
+	
+	// Check App Router structure
+	if (await fs.pathExists(appDir)) {
+		await scanDirectory(appDir, files, 'app');
+	}
+	
+	// Check Pages Router structure
+	if (await fs.pathExists(pagesDir)) {
+		await scanDirectory(pagesDir, files, 'pages');
+	}
+	
+	return files;
+}
 
-	await fs.writeFile(getPath(SEO_COMPONENT_FILENAME), componentCode, 'utf8');
+/**
+ * Scan a directory for Next.js files
+ * @param dir - The directory to scan
+ * @param files - The list of FileInfo objects
+ * @param type - The type of directory ('app' or 'pages')
+ */
+async function scanDirectory(dir: string, files: FileInfo[], type: 'app' | 'pages'): Promise<void> {
+	const entries = await fs.readdir(dir, { withFileTypes: true });
+	
+	for (const entry of entries) {
+		const fullPath = path.join(dir, entry.name);
+		
+		if (entry.isDirectory()) {
+			await scanDirectory(fullPath, files, type);
+		} else if (entry.isFile() && (entry.name === 'layout.tsx' || entry.name === 'page.tsx' || entry.name === 'layout.ts' || entry.name === 'page.ts')) {
+			const content = await fs.readFile(fullPath, 'utf8');
+			const hasMetadata = content.includes('export const metadata');
+			const metadataContent = hasMetadata ? extractMetadataContent(content) : undefined;
+			
+			files.push({
+				path: fullPath,
+				hasMetadata,
+				metadataContent
+			});
+		}
+	}
+}
+
+/**
+ * Extract the metadata content from the file
+ * @param content - The content of the file
+ * @returns The metadata content
+ */
+function extractMetadataContent(content: string): string {
+	const lines = content.split('\n');
+	const metadataLines: string[] = [];
+	let inMetadata = false;
+	let braceCount = 0;
+	
+	for (const line of lines) {
+		if (line.includes('export const metadata')) {
+			inMetadata = true;
+			metadataLines.push(line);
+			braceCount = (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
+			continue;
+		}
+		
+		if (inMetadata) {
+			metadataLines.push(line);
+			braceCount += (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
+			
+			if (braceCount === 0) {
+				break;
+			}
+		}
+	}
+	
+	return metadataLines.join('\n');
+}
+
+/**
+ * Add metadata to the file
+ * @param filePath - The path to the file
+ * @param overwrite - Whether to overwrite the existing metadata
+ * @returns Whether the metadata was added
+ */
+export async function addMetadataToFile(filePath: string, overwrite: boolean = false): Promise<boolean> {
+	const content = await fs.readFile(filePath, 'utf8');
+	
+	if (content.includes('export const metadata') && !overwrite) {
+		return false; // Skip if metadata exists and not overwriting
+	}
+	
+	let newContent = content;
+	
+	// Remove existing metadata if overwriting
+	if (overwrite && content.includes('export const metadata')) {
+		newContent = content.replace(/export const metadata[^;]+;?\s*/gs, '');
+	}
+	
+	// Add import if not present
+	if (!newContent.includes("import { seoConfig } from '@/lib/seo'")) {
+		const importLine = "import { seoConfig } from '@/lib/seo';\n";
+		
+		// Find the best place to add the import
+		const lines = newContent.split('\n');
+		let insertIndex = 0;
+		
+		// Look for existing imports
+		for (let i = 0; i < lines.length; i++) {
+			if (lines[i].startsWith('import ')) {
+				insertIndex = i + 1;
+			} else if (lines[i].trim() === '' && insertIndex > 0) {
+				break;
+			}
+		}
+		
+		lines.splice(insertIndex, 0, importLine);
+		newContent = lines.join('\n');
+	}
+	
+	// Add metadata export
+	const metadataExport = "\nexport const metadata = seoConfig.configToMetadata();\n";
+	
+	// Find the best place to add metadata (after imports, before component)
+	const lines = newContent.split('\n');
+	let insertIndex = lines.length;
+	
+	for (let i = 0; i < lines.length; i++) {
+		if (lines[i].startsWith('export default') || lines[i].startsWith('export function') || lines[i].startsWith('export const') && !lines[i].includes('metadata')) {
+			insertIndex = i;
+			break;
+		}
+	}
+	
+	lines.splice(insertIndex, 0, metadataExport);
+	newContent = lines.join('\n');
+	
+	await fs.writeFile(filePath, newContent, 'utf8');
+	return true;
 }
