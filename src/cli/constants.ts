@@ -1,7 +1,7 @@
 export const TEMPLATES = {
-	config: `import { MetaNext } from "metanext/next";
+	config: `import { Seox } from "seox/next";
 
-export const seoConfig = new MetaNext({
+export const seoConfig = new Seox({
   name: "{{siteName}}",
   url: "{{baseUrl}}",
   title: {

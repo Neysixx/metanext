@@ -3,17 +3,17 @@ import fs from 'fs-extra';
 import ora from 'ora';
 import path from 'path';
 import prompts from 'prompts';
-import { SEO_CONFIG_FILENAME } from '../../constants';
+import { PACKAGE_NAME, SEO_CONFIG_FILENAME } from '../../constants';
 import { TEMPLATES } from '../constants';
 import { getPath } from '../utils';
 import { program } from './program';
 
 program
 	.command('init')
-	.description('Initialize the MetaNext SEO configuration')
+	.description('Initialize the SEOX SEO configuration')
 	//   .option('-t, --template <type>', 'Template to use (blog, ecommerce, corporate)', 'default') // TODO: Add template option
 	.action(async (options) => {
-		console.log(chalk.cyan.bold('\n🧠 MetaNext - Initialization\n'));
+		console.log(chalk.cyan.bold(`\n🧠 ${PACKAGE_NAME} - Initialization\n`));
 
 		// Check if the file already exists
 		if (await fs.pathExists(getPath(SEO_CONFIG_FILENAME))) {
@@ -76,7 +76,7 @@ program
 
 			console.log(chalk.green('\n✅ File created : ') + chalk.gray(getPath(SEO_CONFIG_FILENAME)));
 			console.log(chalk.cyan('\n📝 Next step :'));
-			console.log(chalk.white('   bunx metanext configure'));
+			console.log(chalk.white('   bunx seox configure'));
 			console.log();
 		} catch (error) {
 			spinner.fail('Error creating the configuration');

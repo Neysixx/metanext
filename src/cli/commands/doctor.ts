@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import ora from 'ora';
-import { SEO_CONFIG_FILENAME } from '../../constants';
+import { PACKAGE_NAME, SEO_CONFIG_FILENAME } from '../../constants';
 import { getPath, runDoctorChecks } from '../utils';
 import { program } from './program';
 
@@ -9,7 +9,7 @@ program
 	.command('doctor')
 	.description('Check the validity of your SEO configuration')
 	.action(async () => {
-		console.log(chalk.cyan.bold('\n🩺 MetaNext - Diagnostic SEO\n'));
+		console.log(chalk.cyan.bold(`\n🩺 ${PACKAGE_NAME} - SEO Diagnostic \n`));
 
 		const spinner = ora('Analyzing...').start();
 

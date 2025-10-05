@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import type { SEOAuthor, SEOConfig } from '../../types';
 
-export class MetaNext {
+export class Seox {
 	private config: SEOConfig;
 
 	constructor(config: SEOConfig) {

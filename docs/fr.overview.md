@@ -1,7 +1,7 @@
-# 🧠 MetaNext  
+# 🧠 Seox  
 ### Simplifiez la gestion du SEO dans vos applications **Next.js (App Router)**
 
-MetaNext est un **outil open source** qui vise à **centraliser et automatiser** la gestion du **SEO** (balises meta, Open Graph, JSON-LD…) dans les projets **Next.js** utilisant l'**App Router**.  
+Seox est un **outil open source** qui vise à **centraliser et automatiser** la gestion du **SEO** (balises meta, Open Graph, JSON-LD…) dans les projets **Next.js** utilisant l'**App Router**.  
 Il combine une **configuration TypeScript typée**, une **injection automatique** des métadonnées, et une **CLI intuitive** pour guider le développeur.
 
 ---
@@ -11,7 +11,7 @@ Il combine une **configuration TypeScript typée**, une **injection automatique*
 Aujourd’hui, dans un projet Next.js, chaque page répète manuellement ses balises `<Head>`, ses métadonnées, et son JSON-LD.  
 👉 Cela crée de la **duplication**, des **incohérences**, et complique la maintenance.
 
-MetaNext propose :
+Seox propose :
 - Une **configuration TypeScript typée** (`lib/seo.ts`)
 - Une **injection automatique** des métadonnées dans vos fichiers Next.js
 - Une **API simple** : `seoConfig.configToMetadata()`
@@ -23,20 +23,20 @@ MetaNext propose :
 
 ### 🔹 Pattern de développement
 
-MetaNext suit une logique moderne **DX-first** (Developer Experience) :
+Seox suit une logique moderne **DX-first** (Developer Experience) :
 
 ```bash
 # 1. Installation du package
-bun i metanext
+bun i seox
 
 # 2. Initialisation de la configuration
-bunx metanext init
+bunx seox init
 
 # 3. Configuration et injection automatique
-bunx metanext configure
+bunx seox configure
 
 # 4. Vérification de la configuration
-bunx metanext doctor
+bunx seox doctor
 ```
 
 Ce pattern permet :
@@ -52,14 +52,14 @@ Ce pattern permet :
 ### 1. Fichier de configuration unique : `lib/seo.ts`
 Créé via la commande :
 ```bash
-bunx metanext init
+bunx seox init
 ```
 
 Exemple (src/lib/seo.ts):
 ```ts
-import { MetaNext } from "metanext/next";
+import { Seox } from "seox/next";
 
-export const seoConfig = new MetaNext({
+export const seoConfig = new Seox({
   name: "Mon Super Site",
   url: "https://monsite.com",
   title: {
@@ -98,7 +98,7 @@ La configuration est **centralisée** et **réutilisable**.
 Une fois le fichier complété :
 
 ```bash
-bunx metanext configure
+bunx seox configure
 ```
 
 Cette commande :
@@ -111,7 +111,7 @@ Cette commande :
 
 ### 3. Utilisation dans vos pages
 
-Après l'exécution de `bunx metanext configure`, vos fichiers sont automatiquement mis à jour :
+Après l'exécution de `bunx seox configure`, vos fichiers sont automatiquement mis à jour :
 
 ```tsx
 // app/layout.tsx (généré automatiquement)
@@ -173,28 +173,28 @@ export const metadata = seoConfig.configToMetadata({
 });
 ```
 
-MetaNext fusionne ces champs avec la configuration globale.
+Seox fusionne ces champs avec la configuration globale.
 
 ---
 
 ## 🧰 CLI intégrée
 
-MetaNext propose une CLI intuitive :
+Seox propose une CLI intuitive :
 
 | Commande | Description |
 |----------|--------------|
-| `metanext init` | Crée le fichier `lib/seo.ts` avec configuration interactive |
-| `metanext configure` | Scanne et injecte les métadonnées dans vos fichiers Next.js |
-| `metanext doctor` | Vérifie la validité SEO de votre configuration |
+| `seox init` | Crée le fichier `lib/seo.ts` avec configuration interactive |
+| `seox configure` | Scanne et injecte les métadonnées dans vos fichiers Next.js |
+| `seox doctor` | Vérifie la validité SEO de votre configuration |
 
 ### Options avancées
 
 ```bash
 # Forcer l'écrasement des métadonnées existantes
-bunx metanext configure --force
+bunx seox configure --force
 
 # Validation uniquement (sans génération)
-bunx metanext configure --validate
+bunx seox configure --validate
 ```
 
 ---
@@ -221,7 +221,7 @@ bunx metanext configure --validate
 
 ## 📘 API & Helpers
 
-### `MetaNext` (classe principale)
+### `Seox` (classe principale)
 Configuration centralisée de votre SEO avec typage TypeScript complet.
 
 ### `configToMetadata(overrides?)`

@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import fs from 'fs-extra';
 import ora from 'ora';
 import prompts from 'prompts';
-import { SEO_CONFIG_FILENAME } from '../../constants';
+import { PACKAGE_NAME, SEO_CONFIG_FILENAME } from '../../constants';
 import { addMetadataToFile, findNextFiles, getPath } from '../utils';
 import { program } from './program';
 
@@ -12,7 +12,7 @@ program
 	.option('--validate', 'Validate only without generating', false)
 	.option('--force', 'Force overwrite existing metadata without asking', false)
 	.action(async (options) => {
-		console.log(chalk.cyan.bold('\n⚙️  MetaNext - Configuration\n'));
+		console.log(chalk.cyan.bold(`\n⚙️  ${PACKAGE_NAME} - Configuration\n`));
 
 		const spinner = ora('Reading configuration...').start();
 
@@ -20,7 +20,7 @@ program
 			// Check if the file exists
 			if (!(await fs.pathExists(getPath(SEO_CONFIG_FILENAME)))) {
 				spinner.fail(SEO_CONFIG_FILENAME + ' file not found');
-				console.log(chalk.yellow('\n💡 Run first: ') + chalk.white('bunx metanext init'));
+				console.log(chalk.yellow('\n💡 Run first: ') + chalk.white('bunx seox init'));
 				return;
 			}
 

@@ -1,8 +1,8 @@
-# 🧠 MetaNext
+# 🧠 Seox
 
 > **Simplified SEO management for Next.js App Router**
 
-MetaNext is an **open source tool** that centralizes and automates **SEO management** (meta tags, Open Graph, JSON-LD...) in **Next.js** projects using the **App Router**.  
+Seox is an **open source tool** that centralizes and automates **SEO management** (meta tags, Open Graph, JSON-LD...) in **Next.js** projects using the **App Router**.  
 It combines **TypeScript-typed configuration**, **automatic metadata injection**, and an **intuitive CLI** to guide developers.
 
 [![npm version](https://img.shields.io/npm/v/metanext.svg)](https://www.npmjs.com/package/@neysixx/metanext)
@@ -16,7 +16,7 @@ It combines **TypeScript-typed configuration**, **automatic metadata injection**
 In a typical Next.js project, each page manually repeats its `<Head>` tags, metadata, and JSON-LD.  
 👉 This creates **duplication**, **inconsistencies**, and complicates maintenance.
 
-MetaNext provides:
+Seox provides:
 - **TypeScript-typed configuration** (`lib/seo.ts`)
 - **Automatic metadata injection** into your Next.js files
 - **Simple API**: `seoConfig.configToMetadata()`
@@ -30,23 +30,23 @@ MetaNext provides:
 
 ```bash
 # Using Bun (recommended)
-bun i metanext
+bun i seox
 
 # Using npm
-npm i metanext
+npm i seox
 
 # Using pnpm
-pnpm i metanext
+pnpm i seox
 ```
 
 ### 2. Initialize Configuration
 
 ```bash
 # Using Bun (recommended)
-bunx metanext init
+bunx seox init
 
 # Using npx
-npx metanext init
+npx seox init
 ```
 
 This creates a `lib/seo.ts` file with interactive setup.
@@ -55,14 +55,14 @@ This creates a `lib/seo.ts` file with interactive setup.
 
 ```bash
 # Scan and inject metadata into your Next.js files
-bunx metanext configure
+bunx seox configure
 ```
 
 ### 4. Verify Configuration (In progress)
 
 ```bash
 # Check your SEO configuration
-bunx metanext doctor
+bunx seox doctor
 ```
 
 ---
@@ -74,9 +74,9 @@ bunx metanext doctor
 Created via the `init` command:
 
 ```ts
-import { MetaNext } from "metanext/next";
+import { Seox } from "seox/next";
 
-export const seoConfig = new MetaNext({
+export const seoConfig = new Seox({
   name: "My Awesome Site",
   url: "https://mysite.com",
   title: {
@@ -114,7 +114,7 @@ Configuration is **centralized** and **reusable**.
 Once the file is completed:
 
 ```bash
-bunx metanext configure
+bunx seox configure
 ```
 
 This command:
@@ -125,7 +125,7 @@ This command:
 
 ### 3. Usage in Your Pages
 
-After running `bunx metanext configure`, your files are automatically updated:
+After running `bunx seox configure`, your files are automatically updated:
 
 ```tsx
 // app/layout.tsx (automatically generated)
@@ -185,28 +185,28 @@ export const metadata = seoConfig.configToMetadata({
 });
 ```
 
-MetaNext merges these fields with the global configuration.
+Seox merges these fields with the global configuration.
 
 ---
 
 ## 🧰 Built-in CLI
 
-MetaNext provides an intuitive CLI:
+Seox provides an intuitive CLI:
 
 | Command | Description |
 |---------|-------------|
-| `metanext init` | Creates `lib/seo.ts` with interactive setup |
-| `metanext configure` | Scans and injects metadata into your Next.js files |
-| `metanext doctor` (soon)  | Validates your SEO configuration | 
+| `seox init` | Creates `lib/seo.ts` with interactive setup |
+| `seox configure` | Scans and injects metadata into your Next.js files |
+| `seox doctor` (soon)  | Validates your SEO configuration | 
 
 ### Advanced Options
 
 ```bash
 # Force overwrite existing metadata
-bunx metanext configure --force
+bunx seox configure --force
 
 # Validation only (no generation)
-bunx metanext configure --validate
+bunx seox configure --validate
 ```
 
 ---
@@ -233,7 +233,7 @@ bunx metanext configure --validate
 
 ## 📘 API & Helpers
 
-### `MetaNext` (main class)
+### `Seox` (main class)
 Centralized SEO configuration with complete TypeScript typing.
 
 ### `configToMetadata(overrides?)`
@@ -276,16 +276,16 @@ Direct usage in your Next.js files to generate metadata.
 
 ```bash
 # Bun (recommended)
-bun add metanext
+bun add seox
 
 # npm
-npm install metanext
+npm install seox
 
 # pnpm
-pnpm add metanext
+pnpm add seox
 
 # yarn
-yarn add metanext
+yarn add seox
 ```
 
 ---
@@ -298,8 +298,8 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ```bash
 # Clone the repository
-git clone https://github.com/neysixx/metanext.git
-cd metanext
+git clone https://github.com/neysixx/seox.git
+cd seox
 
 # Install dependencies
 bun install
@@ -327,9 +327,9 @@ MIT © 2025 — Designed for modern Next.js developers 🧑‍💻
 
 ## 📞 Support
 
-- 📖 [Documentation](https://github.com/neysixx/metanext#readme)
-- 🐛 [Report Issues](https://github.com/neysixx/metanext/issues)
-- 💬 [Discussions](https://github.com/neysixx/metanext/discussions)
+- 📖 [Documentation](https://github.com/neysixx/seox#readme)
+- 🐛 [Report Issues](https://github.com/neysixx/seox/issues)
+- 💬 [Discussions](https://github.com/neysixx/seox/discussions)
 - 📧 [Email](mailto:kylliansenrens3004@gmail.com)
 
 ---
@@ -338,6 +338,6 @@ MIT © 2025 — Designed for modern Next.js developers 🧑‍💻
 
 **Made with ❤️ for the Next.js community**
 
-[⭐ Star us on GitHub](https://github.com/neysixx/metanext) • [🐦 Follow on X](https://x.com/ks_nsx) • [📧 Contact](mailto:kylliansenrens3004@gmail.com)
+[⭐ Star us on GitHub](https://github.com/neysixx/seox) • [🐦 Follow on X](https://x.com/ks_nsx) • [📧 Contact](mailto:kylliansenrens3004@gmail.com)
 
 </div>
