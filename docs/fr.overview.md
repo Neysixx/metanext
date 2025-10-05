@@ -1,8 +1,8 @@
 # 🧠 MetaNext  
 ### Simplifiez la gestion du SEO dans vos applications **Next.js (App Router)**
 
-MetaNext est un **outil open source** qui vise à **centraliser et automatiser** la gestion du **SEO** (balises meta, Open Graph, JSON-LD…) dans les projets **Next.js** utilisant l’**App Router**.  
-Il combine une **configuration unique**, une **injection côté serveur** pour les performances, et une **CLI intuitive** pour guider le développeur.
+MetaNext est un **outil open source** qui vise à **centraliser et automatiser** la gestion du **SEO** (balises meta, Open Graph, JSON-LD…) dans les projets **Next.js** utilisant l'**App Router**.  
+Il combine une **configuration TypeScript typée**, une **injection automatique** des métadonnées, et une **CLI intuitive** pour guider le développeur.
 
 ---
 
@@ -12,10 +12,10 @@ Aujourd’hui, dans un projet Next.js, chaque page répète manuellement ses bal
 👉 Cela crée de la **duplication**, des **incohérences**, et complique la maintenance.
 
 MetaNext propose :
-- Une **configuration unique** (`lib/seo.ts`)
-- Une **génération automatique** des balises SEO
-- Une **injection côté serveur** pour une **meilleure performance et indexation**
-- Une **API déclarative simple** : `<SEO name="home" />`
+- Une **configuration TypeScript typée** (`lib/seo.ts`)
+- Une **injection automatique** des métadonnées dans vos fichiers Next.js
+- Une **API simple** : `seoConfig.configToMetadata()`
+- Une **CLI complète** pour initialiser et configurer votre projet
 
 ---
 
@@ -32,18 +32,18 @@ bun i metanext
 # 2. Initialisation de la configuration
 bunx metanext init
 
-# 3. Configuration et génération des fichiers
+# 3. Configuration et injection automatique
 bunx metanext configure
 
-# 4. Utilisation dans vos pages
-<SEO name="home" />
+# 4. Vérification de la configuration
+bunx metanext doctor
 ```
 
 Ce pattern permet :
-- De **centraliser** toutes les données SEO dans un seul fichier
+- De **centraliser** toutes les données SEO dans un seul fichier TypeScript
 - De **typer** fortement les champs pour éviter les erreurs
-- D’**inférer** automatiquement les balises selon la page
-- De **rendre côté serveur** pour un SEO optimal
+- D'**injecter automatiquement** les métadonnées dans vos fichiers Next.js
+- De **valider** votre configuration avec des outils de diagnostic
 
 ---
 
@@ -55,38 +55,46 @@ Créé via la commande :
 bunx metanext init
 ```
 
-Exemple :
+Exemple (src/lib/seo.ts):
 ```ts
-import { defineSEOConfig } from "metanext";
+import { MetaNext } from "metanext/next";
 
-export default defineSEOConfig({
-  site: {
-    name: "Mon Super Site",
-    baseUrl: "https://monsite.com",
-    defaultImage: "/og.png",
+export const seoConfig = new MetaNext({
+  name: "Mon Super Site",
+  url: "https://monsite.com",
+  title: {
+    default: "Mon Super Site",
+    template: "%s | Mon Super Site",
   },
-  pages: {
-    home: {
-      title: "Accueil - Mon Super Site",
-      description: "Bienvenue sur mon site",
-      jsonld: [
-        {
-          "@type": "WebSite",
-          name: "Mon Super Site",
-          url: "https://monsite.com",
-        },
-      ],
+  description: "Bienvenue sur mon site moderne",
+  keywords: ["nextjs", "seo", "typescript"],
+  creator: "Votre Nom",
+  publisher: "Votre Entreprise",
+  authors: [
+    {
+      name: "Votre Nom",
+      url: "https://monsite.com/about",
     },
+  ],
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: "https://monsite.com",
+    siteName: "Mon Super Site",
+  },
+  twitter: {
+    card: "summary_large_image",
+    creator: "@votrecompte",
   },
 });
 ```
 
 🧠 Le typage TypeScript vous guide dans la complétion des champs.  
-Les pages non configurées utilisent un **fallback global**.
+La configuration est **centralisée** et **réutilisable**.
 
 ---
 
-### 2. Configuration & génération
+### 2. Configuration & injection automatique
 Une fois le fichier complété :
 
 ```bash
@@ -94,60 +102,55 @@ bunx metanext configure
 ```
 
 Cette commande :
-- Compile la config (`lib/seo.ts` → `lib/seo-data.json`)
-- Génère les **helpers** (`getSEO()`, composant `<SEO />`)
-- Ajoute automatiquement les balises côté serveur
-- Valide la cohérence SEO (titre, description, OG image…)
+- **Scanne** automatiquement vos fichiers Next.js (`app/` et `pages/`)
+- **Injecte** les métadonnées dans vos `layout.tsx` et `page.tsx`
+- **Gère** les conflits avec les métadonnées existantes
+- **Valide** la cohérence SEO de votre configuration
 
 ---
 
 ### 3. Utilisation dans vos pages
 
-#### Option A : Avec le composant SEO (recommandé)
+Après l'exécution de `bunx metanext configure`, vos fichiers sont automatiquement mis à jour :
+
+```tsx
+// app/layout.tsx (généré automatiquement)
+import { seoConfig } from "@/lib/seo";
+
+export const metadata = seoConfig.configToMetadata();
+```
+
+#### Personnalisation par page
 
 ```tsx
 // app/page.tsx
-import { SEO } from "@/lib/seo";
-
-export default function HomePage() {
-  return (
-    <>
-      <SEO name="home" />
-      <main>
-        <h1>Bienvenue !</h1>
-      </main>
-    </>
-  );
-}
-```
-
-#### Option B : Avec les fonctions utilitaires Next.js
-
-```tsx
-// app/layout.tsx ou app/page.tsx
 import { seoConfig } from "@/lib/seo";
-import { configToMetadata } from "metanext";
 
-export const metadata = configToMetadata(seoConfig, {
-  title: "Page spécifique",
-  description: "Description de la page"
+export const metadata = seoConfig.configToMetadata({
+  title: "Accueil | Mon Super Site",
+  description: "Bienvenue sur la page d'accueil",
+  openGraph: {
+    title: "Accueil - Mon Super Site",
+    description: "Découvrez notre site moderne",
+  },
 });
 ```
 
 💡 **Pourquoi cette approche ?**
 - ✅ **Compatible** avec tous les environnements (AWS Amplify, Vercel, etc.)
 - ✅ **Prévisible** et explicite
-- ✅ **Performant** (pas d'accès au système de fichiers)
+- ✅ **Performant** (injection directe dans les métadonnées Next.js)
 - ✅ **Type-safe** avec TypeScript
+- ✅ **Automatique** (pas besoin de gérer manuellement chaque page)
 
-💡 Le composant `<SEO />` :
-- Injecte automatiquement :
-  - `<title>`
+💡 La méthode `configToMetadata()` :
+- Génère automatiquement :
+  - `<title>` et templates de titre
   - `<meta name="description">`
   - Balises **OpenGraph**
   - Balises **Twitter Card**
-  - Balises **canonical**
-  - Script **JSON-LD**
+  - Métadonnées **robots**
+  - **JSON-LD** (si configuré)
 - Rendu **serveur-side** (SSR/SSG) pour des performances optimales
 
 ---
@@ -157,13 +160,17 @@ export const metadata = configToMetadata(seoConfig, {
 Besoin de modifier certaines valeurs à la volée ?
 
 ```tsx
-<SEO
-  name="home"
-  overrides={{
-    title: "Accueil | Promo 2025",
-    description: "Nouvelle offre disponible !",
-  }}
-/>
+// app/page.tsx
+import { seoConfig } from "@/lib/seo";
+
+export const metadata = seoConfig.configToMetadata({
+  title: "Accueil | Promo 2025",
+  description: "Nouvelle offre disponible !",
+  openGraph: {
+    title: "Promo 2025 - Mon Super Site",
+    description: "Découvrez nos offres exceptionnelles",
+  },
+});
 ```
 
 MetaNext fusionne ces champs avec la configuration globale.
@@ -176,39 +183,53 @@ MetaNext propose une CLI intuitive :
 
 | Commande | Description |
 |----------|--------------|
-| `metanext init` | Crée le fichier `lib/seo.ts` |
-| `metanext configure` | Compile la config et génère les fichiers |
-| `metanext doctor` | Vérifie la validité SEO de la configuration |
+| `metanext init` | Crée le fichier `lib/seo.ts` avec configuration interactive |
+| `metanext configure` | Scanne et injecte les métadonnées dans vos fichiers Next.js |
+| `metanext doctor` | Vérifie la validité SEO de votre configuration |
+
+### Options avancées
+
+```bash
+# Forcer l'écrasement des métadonnées existantes
+bunx metanext configure --force
+
+# Validation uniquement (sans génération)
+bunx metanext configure --validate
+```
 
 ---
 
 ## 🧠 Architecture technique
 
 ```
-[ lib/seo.ts ]  ← fichier source typé
+[ lib/seo.ts ]  ← configuration TypeScript typée
        ↓ (configure)
-[ lib/seo-data.json ] ← config compilée (runtime)
+[ Scan des fichiers Next.js ] ← détection automatique
        ↓
-[ Composant SEO + helper getSEO() ]
+[ Injection des métadonnées ] ← dans layout.tsx/page.tsx
        ↓
-[ Injection côté serveur dans App Router ]
+[ Rendu côté serveur ] ← App Router Next.js
 ```
 
-✅ Lecture rapide  
-✅ Aucun parsing TypeScript au runtime  
-✅ SEO rendu côté serveur  
-✅ Maintenance centralisée
+✅ **Configuration centralisée** en TypeScript  
+✅ **Injection automatique** dans vos fichiers  
+✅ **Type-safe** avec autocomplétion  
+✅ **SEO optimisé** côté serveur  
+✅ **Maintenance simplifiée**
 
 ---
 
 ## 📘 API & Helpers
 
-### `<SEO name="page" />`
-Composant à insérer dans les pages Next.js.  
-Injecte toutes les balises automatiquement selon la config.
+### `MetaNext` (classe principale)
+Configuration centralisée de votre SEO avec typage TypeScript complet.
 
-### `getSEO(name: string)`
-Helper qui retourne la config SEO d’une page, utilisable dans vos composants serveur.
+### `configToMetadata(overrides?)`
+Méthode qui génère les métadonnées Next.js à partir de votre configuration.  
+Accepte des surcharges optionnelles pour personnaliser par page.
+
+### `seoConfig.configToMetadata()`
+Utilisation directe dans vos fichiers Next.js pour générer les métadonnées.
 
 ---
 
@@ -216,17 +237,20 @@ Helper qui retourne la config SEO d’une page, utilisable dans vos composants s
 
 | Fonctionnalité | Statut |
 |----------------|--------|
-| Config TS typée | ✅ |
-| CLI `init` / `configure` / `doctor` | ✅ |
-| JSON-LD support | ✅ |
-| Surcharge locale | ✅ |
+| Configuration TypeScript typée | ✅ |
+| CLI `init` / `configure` | ✅ |
+| Injection automatique des métadonnées | ✅ |
+| Support OpenGraph et Twitter Cards | ✅ |
+| Surcharge locale par page | ✅ |
+| Validation SEO avec `doctor` | ✅ |
+| CLI `doctor` | 🔜 |
 | Support multilingue (`hreflang`) | 🔜 |
-| Génération OG image | 🔜 |
-| Validation SEO poussée | 🔜 |
-| Templates (`--template blog`) | 🔜 |
+| Génération automatique d'images OG | 🔜 |
+| Templates prédéfinis (`--template blog`) | 🔜 |
+| Support JSON-LD avancé | 🔜 |
 
 ---
 
 ## 📜 Licence
 
-MIT © 2025 — Conçu pour les développeurs Next.js modernes 🧑‍💻
+MIT © 2025 — Conçu pour les développeurs Next.js
