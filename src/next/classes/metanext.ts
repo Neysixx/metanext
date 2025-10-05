@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import type { SEOConfig, SEOAuthor } from '../../types';
+import type { SEOAuthor, SEOConfig } from '../../types';
 
 export class MetaNext {
 	private config: SEOConfig;
@@ -20,7 +20,9 @@ export class MetaNext {
 			authors: merged.authors?.map((author: SEOAuthor) => ({ name: author.name, url: author.url })),
 			manifest: merged.manifest,
 			icons: merged.icons ? { ...this.config.icons, ...overrides?.icons } : undefined,
-			formatDetection: merged.formatDetection ? { ...this.config.formatDetection, ...overrides?.formatDetection } : undefined,
+			formatDetection: merged.formatDetection
+				? { ...this.config.formatDetection, ...overrides?.formatDetection }
+				: undefined,
 			openGraph: merged.openGraph
 				? {
 						...this.config.openGraph,

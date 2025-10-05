@@ -51,22 +51,22 @@ export function runDoctorChecks(config: any) {
  */
 export async function findNextFiles(): Promise<FileInfo[]> {
 	const files: FileInfo[] = [];
-	
+
 	// Check if we're in a src-based project
 	const baseDir = fs.existsSync(process.cwd() + '/src') ? 'src' : '';
 	const appDir = path.join(process.cwd(), baseDir, 'app');
 	const pagesDir = path.join(process.cwd(), baseDir, 'pages');
-	
+
 	// Check App Router structure
 	if (await fs.pathExists(appDir)) {
 		await scanDirectory(appDir, files, 'app');
 	}
-	
+
 	// Check Pages Router structure
 	if (await fs.pathExists(pagesDir)) {
 		await scanDirectory(pagesDir, files, 'pages');
 	}
-	
+
 	return files;
 }
 
@@ -78,21 +78,27 @@ export async function findNextFiles(): Promise<FileInfo[]> {
  */
 async function scanDirectory(dir: string, files: FileInfo[], type: 'app' | 'pages'): Promise<void> {
 	const entries = await fs.readdir(dir, { withFileTypes: true });
-	
+
 	for (const entry of entries) {
 		const fullPath = path.join(dir, entry.name);
-		
+
 		if (entry.isDirectory()) {
 			await scanDirectory(fullPath, files, type);
-		} else if (entry.isFile() && (entry.name === 'layout.tsx' || entry.name === 'page.tsx' || entry.name === 'layout.ts' || entry.name === 'page.ts')) {
+		} else if (
+			entry.isFile() &&
+			(entry.name === 'layout.tsx' ||
+				entry.name === 'page.tsx' ||
+				entry.name === 'layout.ts' ||
+				entry.name === 'page.ts')
+		) {
 			const content = await fs.readFile(fullPath, 'utf8');
 			const hasMetadata = content.includes('export const metadata');
 			const metadataContent = hasMetadata ? extractMetadataContent(content) : undefined;
-			
+
 			files.push({
 				path: fullPath,
 				hasMetadata,
-				metadataContent
+				metadataContent,
 			});
 		}
 	}
@@ -108,7 +114,7 @@ function extractMetadataContent(content: string): string {
 	const metadataLines: string[] = [];
 	let inMetadata = false;
 	let braceCount = 0;
-	
+
 	for (const line of lines) {
 		if (line.includes('export const metadata')) {
 			inMetadata = true;
@@ -116,17 +122,17 @@ function extractMetadataContent(content: string): string {
 			braceCount = (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
 			continue;
 		}
-		
+
 		if (inMetadata) {
 			metadataLines.push(line);
 			braceCount += (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
-			
+
 			if (braceCount === 0) {
 				break;
 			}
 		}
 	}
-	
+
 	return metadataLines.join('\n');
 }
 
@@ -138,26 +144,26 @@ function extractMetadataContent(content: string): string {
  */
 export async function addMetadataToFile(filePath: string, overwrite: boolean = false): Promise<boolean> {
 	const content = await fs.readFile(filePath, 'utf8');
-	
+
 	if (content.includes('export const metadata') && !overwrite) {
 		return false; // Skip if metadata exists and not overwriting
 	}
-	
+
 	let newContent = content;
-	
+
 	// Remove existing metadata if overwriting
 	if (overwrite && content.includes('export const metadata')) {
 		newContent = content.replace(/export const metadata[^;]+;?\s*/gs, '');
 	}
-	
+
 	// Add import if not present
 	if (!newContent.includes("import { seoConfig } from '@/lib/seo'")) {
 		const importLine = "import { seoConfig } from '@/lib/seo';\n";
-		
+
 		// Find the best place to add the import
 		const lines = newContent.split('\n');
 		let insertIndex = 0;
-		
+
 		// Look for existing imports
 		for (let i = 0; i < lines.length; i++) {
 			if (lines[i].startsWith('import ')) {
@@ -166,28 +172,32 @@ export async function addMetadataToFile(filePath: string, overwrite: boolean = f
 				break;
 			}
 		}
-		
+
 		lines.splice(insertIndex, 0, importLine);
 		newContent = lines.join('\n');
 	}
-	
+
 	// Add metadata export
-	const metadataExport = "\nexport const metadata = seoConfig.configToMetadata();\n";
-	
+	const metadataExport = '\nexport const metadata = seoConfig.configToMetadata();\n';
+
 	// Find the best place to add metadata (after imports, before component)
 	const lines = newContent.split('\n');
 	let insertIndex = lines.length;
-	
+
 	for (let i = 0; i < lines.length; i++) {
-		if (lines[i].startsWith('export default') || lines[i].startsWith('export function') || lines[i].startsWith('export const') && !lines[i].includes('metadata')) {
+		if (
+			lines[i].startsWith('export default') ||
+			lines[i].startsWith('export function') ||
+			(lines[i].startsWith('export const') && !lines[i].includes('metadata'))
+		) {
 			insertIndex = i;
 			break;
 		}
 	}
-	
+
 	lines.splice(insertIndex, 0, metadataExport);
 	newContent = lines.join('\n');
-	
+
 	await fs.writeFile(filePath, newContent, 'utf8');
 	return true;
 }
