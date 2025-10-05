@@ -1,12 +1,12 @@
 // Main package exports
 export type {
 	SEOAuthor,
-	SEOImage,
-	SEORobots,
-	SEOTwitter,
-	SEOOpenGraph,
+	SEOConfig,
 	SEOFormatDetection,
 	SEOIcons,
+	SEOImage,
 	SEOJsonLd,
-	SEOConfig,
+	SEOOpenGraph,
+	SEORobots,
+	SEOTwitter,
 } from './types';
