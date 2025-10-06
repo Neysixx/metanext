@@ -43,7 +43,7 @@
 		"test": "bun test",
 		"typecheck": "tsc --noEmit",
 		"prepublishOnly": "bun run build && bun run test",
-		"release": "bun run build && changeset publish"
+		"ci": "bun run typecheck && bun run format:check && bun run test && bun run build"
 	},
 	"keywords": [
 		"nextjs",

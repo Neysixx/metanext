@@ -17,8 +17,8 @@
 				{ "type": "docs", "section": "Documentation" }
 			],
 			"release-type": "node",
-            "package-name": "seox",
-            "changelog-path": "CHANGELOG.md"            
+			"package-name": "seox",
+			"changelog-path": "CHANGELOG.md"
 		}
 	}
 }

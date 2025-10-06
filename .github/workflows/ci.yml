@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: "✅ CI Checks"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "📥 Checkout Code"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Setup Bun Runtime"
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: "📦 Install Dependencies"
+        run: bun install --frozen-lockfile
+
+      - name: "🔍 Type Check"
+        run: bun run typecheck
+
+      - name: "💅 Format Check"
+        run: bun run format:check
+
+      - name: "🧪 Run Tests"
+        run: bun run test
+
+      - name: "🏗️ Build Project"
+        run: bun run build
+
+      - name: "💾 Cache Build Artifacts"
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            dist/
+            node_modules/
+          key: build-${{ github.sha }}-${{ hashFiles('**/bun.lock') }}
